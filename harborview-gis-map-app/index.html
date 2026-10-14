@@ -1,0 +1,74 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#eaf8f6">
+  <meta name="description" content="Harborview Explorer — a responsive GIS-style interactive map demo built with Leaflet and OpenStreetMap.">
+  <title>Harborview Explorer | GIS Map Demo</title>
+  <link rel="preconnect" href="https://unpkg.com">
+  <link rel="preconnect" href="https://tile.openstreetmap.org">
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="">
+  <link rel="stylesheet" href="css/style.css">
+  <link rel="icon" href="assets/favicon.svg" type="image/svg+xml">
+</head>
+<body>
+  <main class="phone-app">
+    <header class="app-header">
+      <div class="brand">
+        <span class="brand-mark" aria-hidden="true">⌖</span>
+        <div><strong>Harborview Explorer</strong><small>GIS discovery map</small></div>
+      </div>
+      <button id="locateBtn" class="icon-button" type="button" aria-label="Find my location" title="Find my location">◎</button>
+    </header>
+
+    <section class="search-area" aria-label="Map search">
+      <form id="searchForm" class="search-box">
+        <span class="pin-symbol" aria-hidden="true">●</span>
+        <input id="searchInput" type="search" placeholder="Search a place or coordinates" autocomplete="off" aria-label="Search a place or coordinates">
+        <button type="submit" aria-label="Search">⌕</button>
+      </form>
+      <p class="search-hint" id="searchHint">Try “Lahore”, “Paris”, or “31.5204, 74.3587”.</p>
+    </section>
+
+    <section class="map-wrap" aria-label="Interactive map">
+      <div id="map" role="application" aria-label="Interactive map. Use the zoom buttons or drag to explore."></div>
+      <div class="map-badge"><span class="live-dot"></span> Interactive map</div>
+      <button id="resetBtn" class="map-reset" type="button" title="Reset map view">Reset view</button>
+    </section>
+
+    <section class="place-card" aria-live="polite">
+      <div class="card-topline">
+        <span class="eyebrow">FEATURED PLACE</span>
+        <button id="closeCardBtn" class="close-button" type="button" aria-label="Hide place details">×</button>
+      </div>
+      <div class="place-title-row">
+        <div class="place-icon" aria-hidden="true">⌂</div>
+        <div class="place-title">
+          <h1 id="placeName">Harborview Discovery Center</h1>
+          <p id="placeAddress">18 Azure Quay · Luma Bay (demo location)</p>
+        </div>
+      </div>
+      <p id="placeDescription" class="place-description">A fictional waterfront learning hub shown as a sample point of interest. Select a marker on the map to explore other demo locations.</p>
+      <div class="place-meta">
+        <span><span class="meta-icon">⌖</span><span id="placeCategory">Community & culture</span></span>
+        <span><span class="meta-icon">↗</span><span id="placeDistance">Demo point</span></span>
+      </div>
+      <div class="card-actions">
+        <button id="showAllBtn" class="button button-soft" type="button">Explore places</button>
+        <button id="directionsBtn" class="button button-primary" type="button">Show directions ↗</button>
+      </div>
+      <p class="disclaimer">Demo content and sample POIs. Real basemap data © OpenStreetMap contributors.</p>
+    </section>
+
+    <nav class="bottom-nav" aria-label="Map tools">
+      <button class="nav-item active" type="button" data-view="all"><span>⌖</span><small>Explore</small></button>
+      <button class="nav-item" type="button" data-view="parks"><span>♧</span><small>Green spaces</small></button>
+      <button class="nav-item" type="button" data-view="culture"><span>▤</span><small>Culture</small></button>
+      <button class="nav-item" type="button" data-view="food"><span>♨</span><small>Cafés</small></button>
+    </nav>
+  </main>
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
+  <script src="js/app.js"></script>
+</body>
+</html>
