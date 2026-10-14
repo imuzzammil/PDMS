@@ -1,32 +1,31 @@
-# Harborview Explorer — GIS Map App
+# Harborview Explorer — Interactive Web GIS Map
 
-A responsive, mobile-first GIS-style map demonstration built with **HTML, CSS, JavaScript, Leaflet**, and **OpenStreetMap**.
+## Overview
 
-## Features
+Harborview Explorer is a responsive web mapping application designed to make exploring locations simple and intuitive. It combines an interactive map with a clean, mobile-friendly interface to demonstrate practical Web GIS features.
 
-- Interactive, zoomable map with real OpenStreetMap basemap tiles
-- Fictional sample points of interest with custom teal/green/orange map pins
-- Feature selection and information card
-- Filter buttons for parks, culture, and cafés
-- Search by place name using the OpenStreetMap Nominatim service
-- Search by latitude/longitude coordinates
-- Optional browser geolocation (requires user permission and HTTPS or localhost)
-- Directions link to OpenStreetMap
-- Responsive layout designed to look like a mobile mapping app
+The project uses Leaflet for map interaction and OpenStreetMap for the basemap. It includes fictional sample locations to demonstrate how geographic features can be displayed, selected, searched, and explored.
 
-## Run locally
+## Key Features
 
-This is a static website. Open `index.html` in a browser. For best results, run a local static server:
+- **Interactive Map:** Pan and zoom around the map using Leaflet.
+- **Location Search:** Search for place names or enter latitude and longitude coordinates.
+- **Custom Map Markers:** Display different point-of-interest categories with custom markers.
+- **Category Filters:** Explore sample parks, cultural places, and cafés.
+- **Location Details:** Select a marker to view its name, category, address, and description.
+- **Current Location:** Use browser geolocation with the user's permission.
+- **Directions:** Open the selected coordinates in OpenStreetMap directions.
+- **Responsive Design:** A mobile-first interface that also works on desktop screens.
 
-```bash
-python -m http.server 8000
-```
+## Technologies Used
 
-Then visit `http://localhost:8000`.
+- HTML5
+- CSS3
+- JavaScript
+- Leaflet.js
+- OpenStreetMap
 
-## Deploy on GitHub Pages or Vercel
-
-Upload the project folders and files while preserving this structure:
+## Project Structure
 
 ```text
 harborview-gis-map-app/
@@ -41,26 +40,32 @@ harborview-gis-map-app/
     └── mobile-mockup-preview.png
 ```
 
-### Vercel
-1. Push these files to a GitHub repository.
-2. Import the repository at https://vercel.com/new
-3. Choose **Other** as framework preset.
-4. Leave build command and output directory blank.
-5. Deploy.
+## Getting Started
 
-### GitHub Pages
-In the repository, open **Settings → Pages**, select the main branch and root folder, and save.
+1. Clone or download this repository.
+2. Open `index.html` in a modern browser, or run a local server for the best experience.
+3. Explore the map, test the search field, select markers, and try the category filters.
 
-## Data, tiles, and attribution
+To start a local server with Python:
 
-- The named points of interest in this demo are **fictional sample data**, not real businesses or verified locations.
-- The basemap uses OpenStreetMap tiles. Keep the visible attribution in the lower-right map corner. See:
-  - https://www.openstreetmap.org/copyright
-  - https://operations.osmfoundation.org/policies/tiles/
-- Place-name search uses the public Nominatim API. It is intended for light, interactive use; do not use it for bulk geocoding or send automated high-volume requests. See:
-  - https://operations.osmfoundation.org/policies/nominatim/
-- Leaflet is loaded from the unpkg CDN. A network connection is required for the library, map tiles, and place search.
+```bash
+python -m http.server 8000
+```
 
-## Portfolio note
+Then open `http://localhost:8000` in your browser.
 
-This is a front-end demo project. It demonstrates map UI, map interaction, geocoding, filtering, and geolocation. It does not represent a production GIS backend or official navigation service.
+## Live Demo
+
+Add your deployed Vercel or GitHub Pages URL here after publishing the project.
+
+## Data and Attribution
+
+The named points of interest included in this project are fictional demonstration data. The background basemap is provided by OpenStreetMap.
+
+Map data © OpenStreetMap contributors. See https://www.openstreetmap.org/copyright.
+
+Place-name search uses the public OpenStreetMap Nominatim service and is subject to its usage policy: https://operations.osmfoundation.org/policies/nominatim/.
+
+## Purpose
+
+This project demonstrates front-end Web GIS concepts, interactive mapping, location-based interfaces, and responsive web design. It can serve as a foundation for future projects involving real GIS datasets and web mapping services.
