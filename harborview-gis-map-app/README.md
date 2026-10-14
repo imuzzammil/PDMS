@@ -1,5 +1,5 @@
 # Harborview Explorer
-
+mobile-mockup-preview.png
 ## Overview
 
 Harborview Explorer is a responsive web mapping application designed to make exploring locations simple and intuitive. It combines an interactive map with a clean, mobile-friendly interface to demonstrate practical Web GIS features.
