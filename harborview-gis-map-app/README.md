@@ -1,4 +1,4 @@
-# Harborview Explorer — Interactive Web GIS Map
+# Harborview Explorer
 
 ## Overview
 
