@@ -1,0 +1,1154 @@
+<!DOCTYPE html>
+<html lang="en" class="h-full bg-slate-100 text-slate-800">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>PDMS FESCO - Power Distribution Management System</title>
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- Lucide Icons -->
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <!-- Google Fonts: Inter -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  
+  <style>
+    body { font-family: 'Inter', sans-serif; }
+    
+    /* Custom Scrollbar Styling */
+    ::-webkit-scrollbar { width: 6px; height: 6px; }
+    ::-webkit-scrollbar-track { background: #0f172a; }
+    ::-webkit-scrollbar-thumb { background: #334155; border-radius: 4px; }
+    ::-webkit-scrollbar-thumb:hover { background: #475569; }
+
+    .sidebar-active {
+      background-color: #1e293b;
+      color: #38bdf8;
+      border-left: 4px solid #0284c7;
+    }
+    
+    .pulse-online {
+      box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.7);
+      animation: pulse-ring 2s infinite cubic-bezier(0.66, 0, 0, 1);
+    }
+    @keyframes pulse-ring {
+      to { box-shadow: 0 0 0 8px rgba(16, 185, 129, 0); }
+    }
+
+    .dash-scanline{position:absolute;left:0;right:0;height:3px;background:#38bdf8;box-shadow:0 0 14px 4px #38bdf8;animation:dashscan 1.1s linear infinite}
+    @keyframes dashscan{from{top:0}to{top:100%}}
+    .dash-box{position:absolute;border:2px solid;border-radius:3px;cursor:pointer;transition:box-shadow .15s}
+    .dash-box.sel{box-shadow:0 0 0 3px #fff,0 0 12px 3px currentColor}
+    .dash-tag{position:absolute;left:-2px;top:-18px;font:600 10px/14px Inter,sans-serif;color:#fff;padding:1px 5px;border-radius:2px;white-space:nowrap}
+    @import url('https://fonts.googleapis.com/css2?family=Barlow:wght@400;500;600&family=Barlow+Condensed:wght@500;600;700&display=swap');
+    .sidebar-active{background:#132330!important;color:#FFB224!important;border-left:4px solid #FFB224!important}
+    aside{background:#09131B!important} main>header{background:#0C1822!important;border-color:#233646!important}
+    main>header input{background:#132330!important;border-color:#233646!important;color:#E8EFF3!important}
+    #content-area:has(#tab-dashboard:not(.hidden)){background:#0C1822}
+    .d-root{--pan:#132330;--ln:#233646;--tx:#E8EFF3;--mu:#8CA2B0;--am:#FFB224;--cy:#4CC9F0;font-family:'Barlow',sans-serif;color:var(--tx)}
+    .d-root>*+*{margin-top:1.25rem}
+    .d-filters{display:flex;flex-wrap:wrap;gap:.75rem;align-items:flex-end}
+    .d-f{display:flex;flex-direction:column;gap:3px;font-size:11px;color:var(--mu)}
+    .d-f select{background:var(--pan);color:var(--tx);border:1px solid var(--ln);border-radius:4px;padding:6px 10px;font-size:12px;min-width:140px}
+    .d-btn{background:var(--am);color:#1A1204;font-weight:600;font-size:12px;padding:7px 16px;border-radius:4px;border:1px solid var(--am)}
+    .d-btn.ghost{background:transparent;color:var(--tx);border-color:#35506A}
+    .d-btn:hover{filter:brightness(1.1)} .d-btn:focus-visible,.d-link:focus-visible{outline:2px solid var(--cy);outline-offset:2px}
+    .d-strip{display:grid;grid-template-columns:repeat(auto-fit,minmax(110px,1fr));border-block:1px solid var(--ln)}
+    .d-stat{padding:14px 16px;border-left:1px solid var(--ln)} .d-stat:first-child{border-left:0;padding-left:0}
+    .d-stat b{display:block;font:600 38px/1 'Barlow Condensed',sans-serif} .d-stat span{font-size:12px;color:var(--mu)}
+    .d-hero{background:var(--pan);border:1px solid var(--ln);border-radius:8px;overflow:hidden}
+    .d-hero-head{display:flex;flex-wrap:wrap;gap:12px;justify-content:space-between;align-items:center;padding:18px 20px;border-bottom:1px solid var(--ln)}
+    .d-hero-head h2{font:700 28px/1.1 'Barlow Condensed',sans-serif;letter-spacing:.01em} .d-hero-head p{font-size:13px;color:var(--mu);margin-top:2px}
+    .d-actions{display:flex;gap:8px}
+    .d-hero-body{display:grid;grid-template-columns:minmax(0,3fr) minmax(0,2fr)}
+    @media(max-width:1023px){.d-hero-body{grid-template-columns:1fr}}
+    .d-stage-wrap{background:#060D13;min-height:380px;display:flex;align-items:center;justify-content:center;padding:16px}
+    .d-empty{cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:6px;color:var(--mu);border:1px dashed #35506A;border-radius:6px;padding:56px 44px}
+    .d-empty:hover{color:var(--am);border-color:var(--am)} .d-empty strong{font-size:15px;color:var(--tx)}
+    .d-scan{position:absolute;inset:0;background:rgba(255,178,36,.08);overflow:hidden}
+    .dash-scanline{background:var(--am)!important;box-shadow:0 0 14px 4px var(--am)!important}
+    .d-find{padding:16px 18px;border-left:1px solid var(--ln);display:flex;flex-direction:column;min-width:0}
+    @media(max-width:1023px){.d-find{border-left:0;border-top:1px solid var(--ln)}}
+    .d-find-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:12px}
+    .d-find-head h3,.d-card h3{font:600 18px 'Barlow Condensed',sans-serif;letter-spacing:.02em}
+    .d-pill{font-size:11px;padding:2px 9px;border-radius:99px;background:#1C3142;color:var(--mu)}
+    .d-pill.scan{background:rgba(255,178,36,.15);color:var(--am)} .d-pill.ok{background:rgba(52,211,153,.15);color:#34D399}
+    .d-sum{display:flex;gap:22px;margin-bottom:12px}
+    .d-sum div b{display:block;font:600 40px/1 'Barlow Condensed',sans-serif} .d-sum div span{font-size:12px;color:var(--mu)}
+    .d-list{display:flex;flex-direction:column;gap:8px;overflow-y:auto;max-height:310px;padding-right:4px}
+    .d-hint{font-size:13px;color:var(--mu);padding:28px 0;max-width:34ch}
+    .d-item{display:flex;gap:12px;padding:8px;border:1px solid var(--ln);border-radius:6px;cursor:pointer;background:#0F1D29}
+    .d-item:hover,.d-item.on{border-color:var(--c);background:#16293A}
+    .d-item img{width:76px;height:76px;object-fit:cover;border-radius:4px;background:#060D13;flex-shrink:0;border-bottom:3px solid var(--c)}
+    .d-item h4{font-size:14px;font-weight:600;display:flex;justify-content:space-between;gap:8px}
+    .d-item h4 em{font-style:normal;color:var(--c)}
+    .d-item p{font-size:12px;color:var(--mu);line-height:1.4;margin-top:3px}
+    .d-lower{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,2fr);gap:1.25rem}
+    @media(max-width:1023px){.d-lower{grid-template-columns:1fr}}
+    .d-card{background:var(--pan);border:1px solid var(--ln);border-radius:8px;padding:16px 18px}
+    .d-sub{font-size:12px;color:var(--mu);margin:2px 0 14px}
+    .d-card-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:10px}
+    .d-link{color:var(--cy);font-size:12px}
+    .d-seg{display:flex;height:14px;border-radius:3px;overflow:hidden;gap:2px;margin-bottom:14px}
+    .d-leg{list-style:none;font-size:13px} .d-leg li{display:flex;align-items:center;gap:8px;padding:6px 0;border-top:1px solid var(--ln)}
+    .d-leg li i{width:10px;height:10px;border-radius:2px} .d-leg li b{margin-left:auto;font-family:'Barlow Condensed';font-size:18px}
+    .d-table{width:100%;font-size:13px;border-collapse:collapse;text-align:left}
+    .d-table th{font-weight:500;color:var(--mu);padding:8px;border-bottom:1px solid var(--ln);font-size:12px}
+    .d-table td{padding:10px 8px;border-bottom:1px solid #1B2D3C} .d-table tr:hover td{background:#16293A}
+    .d-tag{font-size:11px;padding:2px 8px;border-radius:99px;background:rgba(255,178,36,.14);color:var(--am)}
+    .d-open{font-size:12px;padding:3px 10px;border:1px solid #35506A;border-radius:4px}.d-open:hover{border-color:var(--am);color:var(--am)}
+    .d-report{grid-column:1/-1;border-top:1px solid var(--ln);padding:16px 20px}
+    .d-report h3{font:600 18px 'Barlow Condensed',sans-serif;letter-spacing:.02em;margin-bottom:10px}
+    .d-report h3 span{font:400 12px 'Barlow',sans-serif;color:var(--mu);margin-left:8px}
+    .d-rgrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:8px}
+    .d-rtile{background:#0F1D29;border:1px solid var(--ln);border-radius:6px;padding:9px 11px}
+    .d-rtile small{display:block;font-size:11px;color:var(--mu)} .d-rtile b{display:block;font-size:14px;font-weight:600;margin:2px 0}
+    .d-rtile i{font-style:normal;font-size:11px;color:#34D399} .d-rtile i.est{color:var(--am)}
+    .d-rtile.nv b{color:var(--mu);font-weight:400} .d-rtile.nv i{color:var(--mu)}
+    .d-defects{margin-top:12px;font-size:13px;display:flex;flex-wrap:wrap;gap:6px;align-items:center}
+    .d-defects span{background:rgba(248,113,113,.15);color:#F87171;padding:2px 9px;border-radius:99px;font-size:12px}
+    .d-defects.ok{color:#34D399}
+  </style>
+</head>
+<body class="h-full flex flex-col overflow-hidden bg-slate-100">
+
+  <!-- Main Container -->
+  <div class="flex h-screen overflow-hidden">
+
+    <!-- Sidebar -->
+    <aside class="w-64 bg-slate-900 text-slate-300 flex flex-col justify-between shrink-0 z-30 shadow-xl border-r border-slate-800">
+      <div class="flex flex-col h-full overflow-y-auto">
+        <!-- Brand Header -->
+        <div class="p-4 bg-slate-950 flex items-center space-x-3 border-b border-slate-800">
+          <div class="w-10 h-10 rounded-full bg-blue-700 flex items-center justify-center text-white font-bold text-xs shadow-md border border-blue-400">
+            FESCO
+          </div>
+          <div>
+            <h1 class="font-bold text-base tracking-wide text-white leading-tight">PDMS FESCO</h1>
+            <p class="text-[10px] text-blue-400 uppercase tracking-wider font-semibold">Power Distribution MIS</p>
+          </div>
+        </div>
+
+        <!-- Navigation Menu Items (Original tools included) -->
+        <nav class="p-2 space-y-1 text-xs">
+          
+          <!-- 1. Dashboard -->
+          <button onclick="switchTab('dashboard')" id="nav-dashboard" class="sidebar-active w-full flex items-center justify-between px-3 py-2.5 rounded-md font-medium hover:bg-slate-800 transition">
+            <div class="flex items-center space-x-3">
+              <i data-lucide="layout-dashboard" class="w-4 h-4 text-sky-400"></i>
+              <span>Dashboard</span>
+            </div>
+          </button>
+
+          <!-- 2. HT Survey Dropdown -->
+          <div>
+            <button onclick="toggleSubmenu('submenu-ht')" class="w-full flex items-center justify-between px-3 py-2.5 rounded-md font-medium text-slate-300 hover:bg-slate-800 transition">
+              <div class="flex items-center space-x-3">
+                <i data-lucide="zap" class="w-4 h-4 text-amber-400"></i>
+                <span>HT Survey</span>
+              </div>
+              <i data-lucide="chevron-down" class="w-3.5 h-3.5 text-slate-400"></i>
+            </button>
+            <div id="submenu-ht" class="hidden pl-8 pr-2 py-1 space-y-1 bg-slate-950/50 rounded-md my-1">
+              <button onclick="switchTab('ht-pole-data')" id="nav-ht-pole-data" class="w-full text-left py-1.5 px-2 text-slate-400 hover:text-white rounded hover:bg-slate-800">HT Pole Data</button>
+              <button onclick="switchTab('ht-equipment')" id="nav-ht-equipment" class="w-full text-left py-1.5 px-2 text-slate-400 hover:text-white rounded hover:bg-slate-800">Equipment</button>
+              <button onclick="switchTab('ht-survey-form')" id="nav-ht-survey-form" class="w-full text-left py-1.5 px-2 text-slate-400 hover:text-white rounded hover:bg-slate-800">+ New Field Survey</button>
+            </div>
+          </div>
+
+          <!-- 3. LT Survey Dropdown -->
+          <div>
+            <button onclick="toggleSubmenu('submenu-lt')" class="w-full flex items-center justify-between px-3 py-2.5 rounded-md font-medium text-slate-300 hover:bg-slate-800 transition">
+              <div class="flex items-center space-x-3">
+                <i data-lucide="plug" class="w-4 h-4 text-emerald-400"></i>
+                <span>LT Survey</span>
+              </div>
+              <i data-lucide="chevron-down" class="w-3.5 h-3.5 text-slate-400"></i>
+            </button>
+            <div id="submenu-lt" class="hidden pl-8 pr-2 py-1 space-y-1 bg-slate-950/50 rounded-md my-1">
+              <button onclick="switchTab('lt-pole-data')" id="nav-lt-pole-data" class="w-full text-left py-1.5 px-2 text-slate-400 hover:text-white rounded hover:bg-slate-800">LT Pole Data</button>
+              <button onclick="switchTab('lt-consumers')" id="nav-lt-consumers" class="w-full text-left py-1.5 px-2 text-slate-400 hover:text-white rounded hover:bg-slate-800">LT Consumer Mapping</button>
+            </div>
+          </div>
+
+          <!-- 4. Consumers -->
+          <button onclick="switchTab('consumers')" id="nav-consumers" class="w-full flex items-center justify-between px-3 py-2.5 rounded-md font-medium text-slate-300 hover:bg-slate-800 transition">
+            <div class="flex items-center space-x-3">
+              <i data-lucide="users" class="w-4 h-4 text-indigo-400"></i>
+              <span>Consumers</span>
+            </div>
+          </button>
+
+          <!-- 5. Feeder Management -->
+          <button onclick="switchTab('feeders')" id="nav-feeders" class="w-full flex items-center justify-between px-3 py-2.5 rounded-md font-medium text-slate-300 hover:bg-slate-800 transition">
+            <div class="flex items-center space-x-3">
+              <i data-lucide="git-branch" class="w-4 h-4 text-purple-400"></i>
+              <span>Feeder Management</span>
+            </div>
+          </button>
+
+          <!-- 6. Photo Analysis Dropdown -->
+          <div>
+            <button onclick="toggleSubmenu('submenu-photo')" class="w-full flex items-center justify-between px-3 py-2.5 rounded-md font-medium text-slate-300 hover:bg-slate-800 transition">
+              <div class="flex items-center space-x-3">
+                <i data-lucide="camera" class="w-4 h-4 text-rose-400"></i>
+                <span>Photo Analysis</span>
+              </div>
+              <i data-lucide="chevron-down" class="w-3.5 h-3.5 text-slate-400"></i>
+            </button>
+            <div id="submenu-photo" class="pl-8 pr-2 py-1 space-y-1 bg-slate-950/50 rounded-md my-1">
+              <button onclick="switchTab('survey-photos')" id="nav-survey-photos" class="w-full text-left py-1.5 px-2 text-slate-400 hover:text-white rounded hover:bg-slate-800">Survey Photos</button>
+              <button onclick="switchTab('ai-inspector')" id="nav-ai-inspector" class="w-full text-left py-1.5 px-2 text-sky-400 font-semibold rounded hover:bg-slate-800 flex items-center justify-between">
+                <span>AI Photo Review</span>
+                <span class="text-[9px] bg-blue-600 text-white px-1.5 py-0.2 rounded font-bold">AI</span>
+              </button>
+              <button onclick="switchTab('confirmed-components')" id="nav-confirmed-components" class="w-full text-left py-1.5 px-2 text-slate-400 hover:text-white rounded hover:bg-slate-800">Confirmed Components</button>
+            </div>
+          </div>
+
+          <!-- 7. Data Search -->
+          <button onclick="switchTab('data-search')" id="nav-data-search" class="w-full flex items-center justify-between px-3 py-2.5 rounded-md font-medium text-slate-300 hover:bg-slate-800 transition">
+            <div class="flex items-center space-x-3">
+              <i data-lucide="search" class="w-4 h-4 text-cyan-400"></i>
+              <span>Data Search</span>
+            </div>
+          </button>
+
+          <!-- 8. Reference Data -->
+          <button onclick="switchTab('reference-data')" id="nav-reference-data" class="w-full flex items-center justify-between px-3 py-2.5 rounded-md font-medium text-slate-300 hover:bg-slate-800 transition">
+            <div class="flex items-center space-x-3">
+              <i data-lucide="database" class="w-4 h-4 text-slate-400"></i>
+              <span>Reference Data</span>
+            </div>
+          </button>
+
+        </nav>
+      </div>
+
+      <!-- System Status Footer -->
+      <div class="p-3 bg-slate-950 border-t border-slate-800 text-xs text-slate-400 flex items-center justify-between">
+        <div class="flex items-center space-x-2">
+          <span class="w-2 h-2 rounded-full bg-emerald-500 pulse-online"></span>
+          <span class="font-medium text-slate-300">FESCO Server Active</span>
+        </div>
+        <span class="text-[10px] text-slate-500 font-mono">v3.5</span>
+      </div>
+    </aside>
+
+    <!-- Main Content Viewport -->
+    <main class="flex-1 flex flex-col h-full overflow-hidden">
+
+      <!-- Top Header Bar -->
+      <header class="h-14 bg-white border-b border-slate-200 px-6 flex items-center justify-between shrink-0 shadow-sm z-20">
+        <div class="flex items-center space-x-3 flex-1 max-w-xl">
+          <i data-lucide="menu" class="w-5 h-5 text-slate-500 cursor-pointer lg:hidden"></i>
+          <!-- Global Search Input -->
+          <div class="relative w-full">
+            <i data-lucide="search" class="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-slate-400"></i>
+            <input type="text" id="top-search-input" onkeyup="handleGlobalSearch(event)" placeholder="Search pole number, feeder, consumer, reference no. or meter no." 
+              class="w-full bg-slate-50 text-xs text-slate-700 placeholder-slate-400 rounded-md pl-9 pr-20 py-2 border border-slate-300 focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition">
+            <button onclick="handleGlobalSearch({key: 'Enter'})" class="absolute right-1 top-1/2 -translate-y-1/2 px-3 py-1 bg-blue-600 hover:bg-blue-700 text-white text-[11px] font-medium rounded">
+              Search
+            </button>
+          </div>
+        </div>
+
+        <!-- Top Right Indicators -->
+        <div class="flex items-center space-x-4">
+          <span class="text-xs text-slate-500 font-medium hidden sm:inline-block">
+            <i data-lucide=></i>
+            
+          </span>
+          <div class="h-4 w-[1px] bg-slate-200 hidden sm:block"></div>
+          <div class="flex items-center space-x-2">
+            <div class=
+            </div>
+            <div class="text-left hidden md:block">
+              <div class=></div>
+              <div class="text-[10px] text-slate-400"></div>
+            </div>
+          </div>
+        </div>
+      </header>
+
+      <!-- Scrollable Main View Area -->
+      <div id="content-area" class="flex-1 overflow-y-auto p-4 md:p-6 space-y-6">
+
+        <!-- ================= TAB 1: DASHBOARD OVERVIEW ================= -->
+        <section id="tab-dashboard" class="d-root">
+          <div class="d-filters">
+            <label class="d-f"><span>Circle</span><select><option>All circles</option><option>Faisalabad Circle 1</option><option>Faisalabad Circle 2</option></select></label><label class="d-f"><span>Division</span><select><option>All divisions</option><option>Madina Town Division</option><option>Civil Lines Division</option></select></label><label class="d-f"><span>Sub division</span><select><option>All sub divisions</option><option>Sub Division 1</option></select></label><label class="d-f"><span>Grid station</span><select><option>All grid stations</option><option>Madina Town Grid</option></select></label><label class="d-f"><span>Feeder</span><select><option>All feeders</option><option>Thokar Niaz Baig</option></select></label>
+            <button class="d-btn ghost">Reset</button><button class="d-btn">Apply</button>
+          </div>
+
+          <div class="d-strip"><div class="d-stat"><b>2</b><span>HT feeders</span></div><div class="d-stat"><b>0</b><span>LT feeders</span></div><div class="d-stat"><b id="stat-ht-poles">7</b><span>HT poles</span></div><div class="d-stat"><b>0</b><span>LT poles</span></div><div class="d-stat"><b>6</b><span>HT surveys</span></div><div class="d-stat"><b>0</b><span>LT surveys</span></div><div class="d-stat"><b>0</b><span>Equipment</span></div><div class="d-stat"><b>0</b><span>Consumers</span></div></div>
+
+          <div class="d-hero">
+            <div class="d-hero-head">
+              <div><h2>Field Asset Scanner</h2><p>Upload a pole or transformer photo. AI marks every component and explains it.</p></div>
+              <div class="d-actions">
+                <button onclick="dashSetKey()" class="d-btn ghost">AI key</button><button onclick="dashLoadSample()" class="d-btn ghost">Sample photo</button><button onclick="document.getElementById('dash-cam-input').click()" class="d-btn ghost">Take photo</button><input type="file" id="dash-cam-input" accept="image/*" capture="environment" class="hidden" onchange="dashHandleUpload(event)">
+                <button onclick="document.getElementById('dash-photo-input').click()" class="d-btn">Upload photo</button>
+                <input type="file" id="dash-photo-input" accept="image/*" class="hidden" onchange="dashHandleUpload(event)">
+              </div>
+            </div>
+            <div class="d-hero-body">
+              <div class="d-stage-wrap" id="dash-drop">
+                <div id="dash-empty" onclick="document.getElementById('dash-photo-input').click()" class="d-empty">
+                  <i data-lucide="scan-line" class="w-9 h-9"></i>
+                  <strong>Drop a photo to start scanning</strong><span>JPG or PNG</span>
+                </div>
+                <div id="dash-stage" class="hidden" style="position:relative;line-height:0">
+                  <img id="dash-img" crossorigin="anonymous" alt="Uploaded asset photo" style="max-height:440px;max-width:100%;width:auto;border-radius:4px">
+                  <div id="dash-boxes" style="position:absolute;inset:0"></div>
+                  <div id="dash-scan" class="d-scan hidden"><div class="dash-scanline"></div></div>
+                </div>
+              </div>
+              <aside class="d-find">
+                <div class="d-find-head"><h3>Detected on this photo</h3><span id="dash-status" class="d-pill">Waiting</span></div>
+                <div id="dash-summary" class="d-sum"></div>
+                <div id="dash-list" class="d-list"><p class="d-hint">Detected items will appear here with their picture, name, confidence and details.</p></div>
+              </aside>
+            </div>
+            <div id="dash-report" class="d-report hidden"></div>
+          </div>
+
+          <div class="d-lower">
+            <div class="d-card">
+              <h3>Survey pipeline</h3><p class="d-sub">HT poles, 7 total</p>
+              <div class="d-seg"><i style="width:14%;background:#5B7083"></i><i style="width:86%;background:var(--am)"></i></div>
+              <ul class="d-leg">
+                <li><i style="background:#5B7083"></i>Draft<b>1</b></li><li><i style="background:var(--am)"></i>Submitted<b>6</b></li>
+                <li><i style="background:var(--cy)"></i>Under review<b>0</b></li><li><i style="background:#34D399"></i>Approved<b>0</b></li>
+              </ul>
+            </div>
+            <div class="d-card">
+              <div class="d-card-head"><h3>Recent survey activity</h3><button onclick="switchTab('ht-pole-data')" class="d-link">View all</button></div>
+              <div style="overflow-x:auto"><table class="d-table">
+                <thead><tr><th>Type</th><th>Pole</th><th>Feeder</th><th>Surveyor</th><th>Surveyed</th><th>Status</th><th></th></tr></thead>
+                <tbody id="dashboard-recent-rows"></tbody>
+              </table></div>
+            </div>
+          </div>
+        </section>
+
+
+        <!-- ================= TAB 2: AI PHOTO REVIEW STUDIO ================= -->
+        <section id="tab-ai-inspector" class="space-y-4 hidden">
+          <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-slate-200 pb-3">
+            <div>
+              <div class="flex items-center space-x-2">
+                <button onclick="switchTab('survey-photos')" class="px-2 py-1 bg-slate-200 hover:bg-slate-300 text-slate-700 text-xs rounded">
+                  &larr; All photos
+                </button>
+                <h2 class="text-base font-bold text-slate-800" id="photo-title-header">Photo Pole.JPG</h2>
+                <span class="px-2 py-0.5 text-[10px] bg-amber-100 text-amber-700 font-semibold rounded border border-amber-300">Needs review</span>
+                <span class="text-xs text-slate-400 font-mono">Pole 1800025</span>
+              </div>
+            </div>
+
+            <div class="flex items-center space-x-2">
+              <button onclick="reAnalyzeCurrentPhoto()" class="px-3 py-1.5 bg-blue-600 hover:bg-blue-700 text-white text-xs font-medium rounded shadow-sm flex items-center space-x-1">
+                <i data-lucide="refresh-cw" class="w-3.5 h-3.5"></i>
+                <span>Re-analyse</span>
+              </button>
+            </div>
+          </div>
+
+          <!-- Main Inspector Workspace (Matching Screenshot 2) -->
+          <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+
+            <!-- Left 2 Columns: Image Viewport with SVG Bounding Box overlays -->
+            <div class="lg:col-span-2 bg-white rounded-lg border border-slate-200 p-4 shadow-sm flex flex-col justify-between min-h-[500px]">
+
+              <div class="flex items-center justify-between pb-3 border-b border-slate-100">
+                <span class="text-xs font-semibold text-slate-700">Photo Preview & AI Bounding Overlay</span>
+                
+                <div class="flex items-center space-x-4">
+                  <!-- Toggle Show Boxes -->
+                  <label class="inline-flex items-center cursor-pointer text-xs text-slate-600">
+                    <input type="checkbox" id="toggle-show-boxes" checked onchange="renderBoundingOverlay()" class="sr-only peer">
+                    <div class="w-8 h-4 bg-slate-300 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-3 after:w-3 after:transition-all peer-checked:bg-blue-600 relative"></div>
+                    <span class="ml-2">Show boxes</span>
+                  </label>
+
+                  <!-- Upload Own Photo -->
+                  <button onclick="document.getElementById('upload-ai-photo').click()" class="text-xs text-blue-600 hover:underline flex items-center">
+                    <i data-lucide="upload" class="w-3.5 h-3.5 mr-1"></i> Upload Custom Pole Photo
+                  </button>
+                  <input type="file" id="upload-ai-photo" accept="image/*" class="hidden" onchange="handlePhotoUpload(event)">
+                </div>
+              </div>
+
+              <!-- Interactive Image Viewport with Box Overlays -->
+              <div class="relative flex-1 bg-slate-900 rounded-lg overflow-hidden flex items-center justify-center my-3 min-h-[420px] border border-slate-800">
+                <img id="inspector-image" src="https://images.unsplash.com/photo-1544725176-7c40e5a71c5e?auto=format&fit=crop&w=800&q=80" alt="Electric Pole Asset" class="max-h-[460px] w-auto object-contain">
+
+                <!-- SVG Overlay for Box Detections -->
+                <svg id="inspector-svg-overlay" class="absolute inset-0 w-full h-full pointer-events-none" preserveAspectRatio="none">
+                  <!-- Injected via JavaScript -->
+                </svg>
+              </div>
+
+              <div class="flex items-center justify-between text-xs text-slate-400 pt-2">
+                <span>Model: <strong class="text-slate-600">gemini-3.5-flash</strong></span>
+                <span>Detections: <strong class="text-blue-600 font-bold" id="detection-total-count">20</strong></span>
+              </div>
+            </div>
+
+            <!-- Right Column: AI Analysis Review List -->
+            <div class="space-y-4">
+              <!-- AI Run Info Box -->
+              <div class="bg-white p-4 rounded-lg border border-slate-200 shadow-sm space-y-2">
+                <h3 class="text-xs font-bold text-slate-700 uppercase tracking-wider">AI Analysis</h3>
+                <div class="bg-slate-50 p-2.5 rounded border border-slate-200 text-xs space-y-1">
+                  <div class="text-[10px] uppercase font-bold text-slate-400">ANALYSIS RUN</div>
+                  <div class="font-medium text-slate-700" id="ai-timestamp-label">29 Sep 2026 13:00 - gemini-3.5-flash - completed (20)</div>
+                </div>
+
+                <div class="flex items-center space-x-2 text-[11px] pt-1">
+                  <span class="px-2 py-0.5 rounded bg-emerald-50 text-emerald-700 font-semibold border border-emerald-200" id="count-confirmed-tag">0 confirmed</span>
+                  <span class="px-2 py-0.5 rounded bg-rose-50 text-rose-700 font-semibold border border-rose-200" id="count-rejected-tag">0 rejected</span>
+                  <span class="px-2 py-0.5 rounded bg-amber-50 text-amber-700 font-semibold border border-amber-200" id="count-review-tag">20 to review</span>
+                </div>
+              </div>
+
+              <!-- Detected Components Approval List -->
+              <div class="bg-white p-4 rounded-lg border border-slate-200 shadow-sm space-y-3">
+                <div class="flex items-center justify-between border-b border-slate-100 pb-2">
+                  <span class="text-xs font-bold text-slate-700">Detected components</span>
+                  <div class="space-x-1">
+                    <button onclick="confirmAllHighConfidence()" class="px-2 py-0.5 text-[10px] bg-emerald-100 text-emerald-800 font-medium rounded hover:bg-emerald-200">Confirm high (80%+)</button>
+                  </div>
+                </div>
+
+                <!-- Scrollable Cards -->
+                <div id="ai-components-list" class="space-y-3 max-h-[360px] overflow-y-auto pr-1">
+                  <!-- Dynamic Component Cards injected via JS -->
+                </div>
+              </div>
+            </div>
+
+          </div>
+        </section>
+
+
+        <!-- ================= TAB 3: HT POLE DATA TABLE ================= -->
+        <section id="tab-ht-pole-data" class="space-y-4 hidden">
+          <div class="flex items-center justify-between">
+            <h2 class="text-base font-bold text-slate-800">HT Poles Inventory</h2>
+            <button onclick="switchTab('ht-survey-form')" class="px-3 py-1.5 bg-blue-600 hover:bg-blue-700 text-white text-xs font-medium rounded shadow-sm">
+              + Add HT Survey
+            </button>
+          </div>
+
+          <div class="bg-white p-4 rounded-lg border border-slate-200 shadow-sm space-y-3">
+            <!-- Search & Filter Bar -->
+            <div class="grid grid-cols-1 sm:grid-cols-4 gap-3">
+              <div>
+                <label class="block text-[10px] font-bold text-slate-400 uppercase">POLE NUMBER</label>
+                <input type="text" id="filter-ht-pole-id" onkeyup="filterHTTable()" placeholder="e.g. 180001" class="w-full bg-slate-50 border border-slate-300 text-xs rounded p-1.5 text-slate-700 focus:outline-none">
+              </div>
+              <div>
+                <label class="block text-[10px] font-bold text-slate-400 uppercase">SURVEY STATUS</label>
+                <select id="filter-ht-status" onchange="filterHTTable()" class="w-full bg-slate-50 border border-slate-300 text-xs rounded p-1.5 text-slate-700 focus:outline-none">
+                  <option value="all">All statuses</option>
+                  <option value="Submitted">Submitted</option>
+                  <option value="Draft">Draft</option>
+                </select>
+              </div>
+              <div>
+                <label class="block text-[10px] font-bold text-slate-400 uppercase">FROM DATE</label>
+                <input type="date" class="w-full bg-slate-50 border border-slate-300 text-xs rounded p-1.5 text-slate-700 focus:outline-none">
+              </div>
+              <div>
+                <label class="block text-[10px] font-bold text-slate-400 uppercase">TO DATE</label>
+                <input type="date" class="w-full bg-slate-50 border border-slate-300 text-xs rounded p-1.5 text-slate-700 focus:outline-none">
+              </div>
+            </div>
+
+            <!-- Table -->
+            <div class="overflow-x-auto border border-slate-200 rounded">
+              <table class="w-full text-left text-xs border-collapse">
+                <thead>
+                  <tr class="bg-slate-50 border-b border-slate-200 text-slate-500 font-semibold">
+                    <th class="p-2.5">POLE NO.</th>
+                    <th class="p-2.5">FEEDER</th>
+                    <th class="p-2.5">CLASS / TYPE</th>
+                    <th class="p-2.5">HEIGHT</th>
+                    <th class="p-2.5">STATUS</th>
+                    <th class="p-2.5">LAST SURVEY</th>
+                    <th class="p-2.5">STAY WIRES / DISCS</th>
+                    <th class="p-2.5">X (LON)</th>
+                    <th class="p-2.5">Y (LAT)</th>
+                    <th class="p-2.5 text-right">ACTIONS</th>
+                  </tr>
+                </thead>
+                <tbody id="ht-pole-table-body" class="divide-y divide-slate-100">
+                  <!-- Populated via JS -->
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </section>
+
+
+        <!-- ================= TAB 4: SURVEY PHOTOS LIST ================= -->
+        <section id="tab-survey-photos" class="space-y-4 hidden">
+          <div class="flex items-center justify-between">
+            <h2 class="text-base font-bold text-slate-800">Survey Photos</h2>
+            <button onclick="switchTab('ai-inspector')" class="px-3 py-1.5 bg-blue-600 hover:bg-blue-700 text-white text-xs font-medium rounded shadow-sm">
+              Analyse Next 3 New Photos
+            </button>
+          </div>
+
+          <div class="bg-white p-4 rounded-lg border border-slate-200 shadow-sm overflow-x-auto">
+            <table class="w-full text-left text-xs border-collapse">
+              <thead>
+                <tr class="bg-slate-50 border-b border-slate-200 text-slate-500 font-semibold">
+                  <th class="p-2.5">PHOTO</th>
+                  <th class="p-2.5">FILE</th>
+                  <th class="p-2.5">POLE / FEEDER</th>
+                  <th class="p-2.5">STATE</th>
+                  <th class="p-2.5">MODEL / ANALYSED</th>
+                  <th class="p-2.5">DETECTIONS</th>
+                  <th class="p-2.5 text-right">ACTION</th>
+                </tr>
+              </thead>
+              <tbody id="survey-photos-table-body" class="divide-y divide-slate-100">
+                <!-- Populated via JS -->
+              </tbody>
+            </table>
+          </div>
+        </section>
+
+
+        <!-- ================= TAB 5: FIELD SURVEY FORM (Simulated Mobile Input) ================= -->
+        <section id="tab-ht-survey-form" class="space-y-4 hidden">
+          <div class="max-w-xl mx-auto bg-white rounded-xl border border-slate-200 shadow-lg overflow-hidden">
+            <!-- Header (Matching Screenshot 1) -->
+            <div class="bg-slate-900 text-white p-4 flex items-center justify-between">
+              <div class="flex items-center space-x-2">
+                <button onclick="switchTab('dashboard')" class="text-slate-300 hover:text-white">&larr;</button>
+                <h2 class="text-sm font-bold">HT survey</h2>
+              </div>
+              <span class="px-2 py-0.5 bg-emerald-500 text-white font-bold text-[10px] rounded">online</span>
+            </div>
+
+            <form onsubmit="handleSurveyFormSubmit(event)" class="p-5 space-y-4 text-xs">
+              <div class="font-bold text-slate-800 border-b border-slate-200 pb-2 text-sm">
+                1. Pole & location
+              </div>
+
+              <div>
+                <label class="block text-slate-600 font-medium mb-1">Pole number *</label>
+                <input type="text" id="survey-input-pole" required placeholder="e.g. 180001" class="w-full bg-slate-50 border border-slate-300 rounded p-2 text-slate-800 focus:outline-none focus:border-blue-500">
+              </div>
+
+              <div class="grid grid-cols-2 gap-3">
+                <div>
+                  <label class="block text-slate-600 font-medium mb-1">Latitude</label>
+                  <input type="text" id="survey-input-lat" placeholder="3.000000" class="w-full bg-slate-50 border border-slate-300 rounded p-2 text-slate-800 focus:outline-none">
+                </div>
+                <div>
+                  <label class="block text-slate-600 font-medium mb-1">Longitude</label>
+                  <input type="text" id="survey-input-lng" placeholder="4.000000" class="w-full bg-slate-50 border border-slate-300 rounded p-2 text-slate-800 focus:outline-none">
+                </div>
+              </div>
+
+              <!-- GPS Capture Button -->
+              <button type="button" onclick="simulateGPSCapture()" class="w-full py-2.5 bg-amber-600 hover:bg-amber-700 text-white font-bold rounded flex items-center justify-center space-x-2 shadow-sm">
+                <i data-lucide="crosshair" class="w-4 h-4"></i>
+                <span>Capture GPS</span>
+              </button>
+
+              <div>
+                <label class="block text-slate-600 font-medium mb-1">Pole class</label>
+                <select id="survey-input-class" class="w-full bg-slate-50 border border-slate-300 rounded p-2 text-slate-800 focus:outline-none">
+                  <option value="-- select --">-- select --</option>
+                  <option value="Panel Feeder">Panel Feeder</option>
+                  <option value="Steel Structure">Steel Structure</option>
+                  <option value="Wood Pole">Wood Pole</option>
+                </select>
+              </div>
+
+              <div>
+                <label class="block text-slate-600 font-medium mb-1">Pole type</label>
+                <select id="survey-input-type" class="w-full bg-slate-50 border border-slate-300 rounded p-2 text-slate-800 focus:outline-none">
+                  <option value="-- select --">-- select --</option>
+                  <option value="Tap Pole">Tap Pole</option>
+                  <option value="Primary Pole">Primary Pole</option>
+                </select>
+              </div>
+
+              <div>
+                <label class="block text-slate-600 font-medium mb-1">Pole height</label>
+                <select id="survey-input-height" class="w-full bg-slate-50 border border-slate-300 rounded p-2 text-slate-800 focus:outline-none">
+                  <option value="-- select --">-- select --</option>
+                  <option value="30 ft">30 ft</option>
+                  <option value="35 ft">35 ft</option>
+                  <option value="40 ft">40 ft</option>
+                </select>
+              </div>
+
+              <div class="pt-3">
+                <button type="submit" class="w-full py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white font-bold rounded shadow-sm text-sm">
+                  Save & Next &rarr;
+                </button>
+              </div>
+            </form>
+          </div>
+        </section>
+
+
+        <!-- ================= OTHER PLACEHOLDER MODULES ================= -->
+        <!-- LT Pole Data / Consumers / Feeders / Data Search / Reference Data -->
+        <section id="tab-lt-pole-data" class="hidden p-6 bg-white rounded-lg border border-slate-200">
+          <h2 class="text-sm font-bold text-slate-700 mb-2">LT Pole Data</h2>
+          <p class="text-xs text-slate-500">Low Tension (LT) network surveying data and transformer downstream mappings.</p>
+        </section>
+
+        <section id="tab-lt-consumers" class="hidden p-6 bg-white rounded-lg border border-slate-200">
+          <h2 class="text-sm font-bold text-slate-700 mb-2">LT Consumer Mapping</h2>
+          <p class="text-xs text-slate-500">Linked consumer meters and service drop lines.</p>
+        </section>
+
+        <section id="tab-consumers" class="hidden p-6 bg-white rounded-lg border border-slate-200">
+          <h2 class="text-sm font-bold text-slate-700 mb-2">Consumers Master Records</h2>
+          <p class="text-xs text-slate-500">Searchable meter indices, connection status, and tariff categories.</p>
+        </section>
+
+        <section id="tab-feeders" class="hidden p-6 bg-white rounded-lg border border-slate-200">
+          <h2 class="text-sm font-bold text-slate-700 mb-2">Feeder Management</h2>
+          <p class="text-xs text-slate-500">Grid station feeders, line length calculations, and load distribution stats.</p>
+        </section>
+
+        <section id="tab-confirmed-components" class="hidden p-6 bg-white rounded-lg border border-slate-200">
+          <h2 class="text-sm font-bold text-slate-700 mb-2">Confirmed Pole Components</h2>
+          <p class="text-xs text-slate-500">Validated hardware records after AI inspection reviews.</p>
+        </section>
+
+        <section id="tab-data-search" class="hidden p-6 bg-white rounded-lg border border-slate-200">
+          <h2 class="text-sm font-bold text-slate-700 mb-2">Data Search Tool</h2>
+          <p class="text-xs text-slate-500">Query grid database across poles, reference numbers, and meters.</p>
+        </section>
+
+        <section id="tab-reference-data" class="hidden p-6 bg-white rounded-lg border border-slate-200">
+          <h2 class="text-sm font-bold text-slate-700 mb-2">Reference Data Tables</h2>
+          <p class="text-xs text-slate-500">Master lookup tables for insulator classes, stay wire ratings, and pole heights.</p>
+        </section>
+
+        <section id="tab-ht-equipment" class="hidden p-6 bg-white rounded-lg border border-slate-200">
+          <h2 class="text-sm font-bold text-slate-700 mb-2">HT Equipment Registry</h2>
+          <p class="text-xs text-slate-500">Switches, isolators, reclosers, and lightning arresters.</p>
+        </section>
+
+      </div>
+    </main>
+  </div>
+
+  <!-- Notification Message Box -->
+  <div id="toast-box" class="fixed bottom-4 right-4 bg-slate-900 text-white px-4 py-2.5 rounded-lg text-xs shadow-xl border border-slate-700 transform translate-y-20 opacity-0 transition-all duration-300 z-50 flex items-center space-x-2">
+    <i data-lucide="check-circle-2" class="w-4 h-4 text-emerald-400"></i>
+    <span id="toast-text">Notification message</span>
+  </div>
+
+  <script>
+    // --- Application Data Models ---
+    
+    // HT Poles Master List
+    let htPoles = [
+      { poleNo: "180001", feeder: "Thokar Niaz Baig", grid: "Madina Town Grid Station", classType: "Panel Feeder", height: "30 ft", status: "Submitted", date: "24 Sep 2026", surveyor: "Field Surveyor", stayDiscs: "0 / 0", x: "4.000000", y: "3.000000" },
+      { poleNo: "1800025", feeder: "Thokar Niaz Baig", grid: "Madina Town Grid Station", classType: "Steel Structure Tap Pole", height: "40 ft", status: "Submitted", date: "24 Sep 2026", surveyor: "Field Surveyor", stayDiscs: "12 / 0", x: "2.000000", y: "2.000000" },
+      { poleNo: "180005", feeder: "Thokar Niaz Baig", grid: "Madina Town Grid Station", classType: "Steel Structure Primary Pole", height: "35 ft", status: "Submitted", date: "24 Sep 2026", surveyor: "Field Surveyor", stayDiscs: "12 / 0", x: "12.000000", y: "12.000000" },
+      { poleNo: "180007", feeder: "Thokar Niaz Baig", grid: "Madina Town Grid Station", classType: "Wood Pole Tap Pole", height: "35 ft", status: "Submitted", date: "24 Sep 2026", surveyor: "Field Surveyor", stayDiscs: "1 / 0", x: "1.000000", y: "21.000000" },
+      { poleNo: "1817156", feeder: "Thokar Niaz Baig", grid: "Madina Town Grid Station", classType: "--", height: "--", status: "Submitted", date: "24 Sep 2026", surveyor: "Field Surveyor", stayDiscs: "1 / 3", x: "73.079000", y: "31.450400" },
+      { poleNo: "1851326", feeder: "Thokar Niaz Baig", grid: "Madina Town Grid Station", classType: "--", height: "--", status: "Submitted", date: "24 Sep 2026", surveyor: "Field Surveyor", stayDiscs: "0 / 0", x: "73.079000", y: "31.450400" },
+      { poleNo: "18999", feeder: "Thokar Niaz Baig", grid: "Madina Town Grid Station", classType: "--", height: "--", status: "Draft", date: "--", surveyor: "--", stayDiscs: "- / -", x: "131.400000", y: "73.100000" }
+    ];
+
+    // Survey Photos List
+    let surveyPhotos = [
+      { file: "Pole.JPG", date: "24 Sep 2026 13:28", pole: "1800025", feeder: "Thokar Niaz Baig", state: "Needs review", detections: 20, confirmed: 0, rejected: 0, image: "https://images.unsplash.com/photo-1544725176-7c40e5a71c5e?auto=format&fit=crop&w=800&q=80" },
+      { file: "Pole.JPG", date: "24 Sep 2026 10:29", pole: "180007", feeder: "Thokar Niaz Baig", state: "Needs review", detections: 15, confirmed: 1, rejected: 1, image: "https://images.unsplash.com/photo-1509391365360-2e959784a276?auto=format&fit=crop&w=800&q=80" },
+      { file: "Pole.JPG", date: "24 Sep 2026 10:15", pole: "180005", feeder: "Thokar Niaz Baig", state: "Needs review", detections: 20, confirmed: 0, rejected: 0, image: "https://images.unsplash.com/photo-1544725176-7c40e5a71c5e?auto=format&fit=crop&w=800&q=80" },
+      { file: "Pole.JPG", date: "24 Sep 2026 09:39", pole: "180001", feeder: "Thokar Niaz Baig", state: "Needs review", detections: 16, confirmed: 0, rejected: 0, image: "https://images.unsplash.com/photo-1509391365360-2e959784a276?auto=format&fit=crop&w=800&q=80" }
+    ];
+
+    // AI Detected Components dataset for the active review image
+    let currentDetections = [
+      { id: 1, name: "Pole", conf: 95, state: "Needs review", bbox: { x: 42, y: 12, w: 16, h: 80 }, color: "#eab308" },
+      { id: 2, name: "Cross Arm", conf: 90, state: "Needs review", bbox: { x: 26, y: 20, w: 48, h: 10 }, color: "#eab308" },
+      { id: 3, name: "Cross Arm", conf: 90, state: "Needs review", bbox: { x: 28, y: 38, w: 44, h: 10 }, color: "#eab308" },
+      { id: 4, name: "Insulator", conf: 88, state: "Needs review", bbox: { x: 24, y: 14, w: 10, h: 8 }, color: "#eab308" },
+      { id: 5, name: "Insulator", conf: 87, state: "Needs review", bbox: { x: 66, y: 14, w: 10, h: 8 }, color: "#eab308" },
+      { id: 6, name: "Switch/Isolator", conf: 85, state: "Needs review", bbox: { x: 40, y: 28, w: 20, h: 12 }, color: "#eab308" },
+      { id: 7, name: "Lightning Arrester", conf: 82, state: "Needs review", bbox: { x: 42, y: 52, w: 18, h: 14 }, color: "#eab308" },
+      { id: 8, name: "HT Line", conf: 92, state: "Needs review", bbox: { x: 10, y: 18, w: 80, h: 6 }, color: "#eab308" }
+    ];
+
+
+    // ===== Dashboard AI Photo Detection =====
+    const DASH_TYPES = {
+      pole:  { label: "HT Pole", color: "#FFB224", info: "11 kV support structure (steel, wood or RCC) that carries the cross arms and conductors." },
+      trf:   { label: "Transformer", color: "#4CC9F0", info: "Distribution transformer: steps 11 kV down to 400 V LT supply. Mounted on a pole or plinth." },
+      arm:   { label: "Cross Arm", color: "#C084FC", info: "Horizontal angle or channel at the top of the pole that holds the insulators and lines." },
+      ins:   { label: "Insulator", color: "#F472B6", info: "Electrically isolates the conductor from the pole so current does not leak to ground." },
+      la:    { label: "Lightning Arrester", color: "#34D399", info: "Protects the transformer and line from lightning strikes and voltage surges." },
+      stay:  { label: "Stay Wire", color: "#A3E635", info: "Guy wire that anchors the pole against conductor tension and wind, keeping it upright." },
+      fuse:  { label: "Drop-out Fuse / Isolator", color: "#f97316", info: "Protection and isolation switch on the HT side of the transformer." }
+    };
+    let dashItems = [];
+
+    // ===== Real AI analysis (Claude vision, called from the browser) =====
+    const AI_PROMPT = `You are a power distribution survey expert for an 11 kV / 400 V utility network (FESCO, Pakistan). Analyze this photo of an electric pole and/or transformer.
+Return ONLY valid JSON, no other text:
+{"items":[{"type":"pole|trf|arm|ins|la|fuse|stay","x":0,"y":0,"w":0,"h":0,"conf":0}],
+ "report":{"pole_type":F,"pole_class":F,"pole_height":F,"conductors":F,"cross_arm":F,"discs_count":F,"stay_wire":F,"t_off":F,"foundation":F,"transformer":F},
+ "defects":["..."]}
+F = {"value":"short text or null","conf":0-100,"basis":"visible"|"estimated"|"not_visible"}.
+items: one entry per visible object (pole, trf=transformer, arm=cross arm, ins=insulator, la=lightning arrester, fuse=drop-out fuse/isolator, stay=stay wire). x,y = top-left corner, w,h = size, all as percent (0-100) of the image width/height.
+Fields: pole_type (RCC / PCC / steel / wooden), pole_class (class or rating if a marking is visible), pole_height (metres, estimate), conductors (count and layout, e.g. "3 conductors, single circuit"), cross_arm (count and type), discs_count (discs per insulator string), stay_wire (count), t_off (is a tap-off/branch line visible), foundation (type if visible), transformer (present? kVA if nameplate readable, mounting type).
+Use basis "not_visible" and value null when something cannot be seen. Never invent values. defects = visible problems only (leaning, rust, broken insulator, vegetation near lines, etc.), else [].`;
+
+    function dashKey() { try { return localStorage.getItem('pdms_ai_key') || ''; } catch (e) { return ''; } }
+    function dashSetKey() {
+      const k = prompt('Paste your Anthropic API key (stored only in this browser):', dashKey());
+      if (k === null) return;
+      try { localStorage.setItem('pdms_ai_key', k.trim()); } catch (e) {}
+      const st = document.getElementById('dash-status'); st.textContent = k.trim() ? 'AI key saved' : 'No AI key'; st.className = 'd-pill';
+    }
+    function dashLoadSample() { dashShow("https://images.unsplash.com/photo-1544725176-7c40e5a71c5e?auto=format&fit=crop&w=800&q=80"); }
+    function dashHandleUpload(e) {
+      const f = e.target.files[0]; if (!f) return;
+      const r = new FileReader(); r.onload = ev => dashShow(ev.target.result); r.readAsDataURL(f); e.target.value = '';
+    }
+    function dashShow(src) {
+      document.getElementById('dash-empty').classList.add('hidden');
+      document.getElementById('dash-stage').classList.remove('hidden');
+      document.getElementById('dash-boxes').innerHTML = '';
+      document.getElementById('dash-report').classList.add('hidden');
+      document.getElementById('dash-scan').classList.remove('hidden');
+      const st = document.getElementById('dash-status'); st.textContent = 'AI analyzing...'; st.className = 'd-pill scan';
+      const img = document.getElementById('dash-img');
+      img.onload = async () => {
+        try {
+          if (!dashKey()) { dashSetKey(); if (!dashKey()) throw new Error('AI key needed. Click "AI key" and paste it.'); }
+          const res = await dashAnalyzeAI(img);
+          dashItems = (res.items || []).filter(i => DASH_TYPES[i.type]).map((i, n) => ({ id: n + 1, t: i.type, x: clamp(i.x), y: clamp(i.y), w: clamp(i.w, 2), h: clamp(i.h, 2), conf: Math.round(i.conf || 0) }));
+          dashRender(); dashRenderReport(res.report || {}, res.defects || []);
+        } catch (err) {
+          document.getElementById('dash-scan').classList.add('hidden');
+          st.textContent = 'Analysis failed'; st.className = 'd-pill';
+          document.getElementById('dash-list').innerHTML = '<p class="d-hint">' + String(err.message || err).replace(/</g, '&lt;') + '</p>';
+        }
+      };
+      img.src = src;
+    }
+    const clamp = (v, m = 0) => Math.max(m, Math.min(100, Number(v) || 0));
+    async function dashAnalyzeAI(img) {
+      const k = Math.min(1, 1280 / Math.max(img.naturalWidth, img.naturalHeight));
+      const c = document.createElement('canvas'); c.width = img.naturalWidth * k; c.height = img.naturalHeight * k;
+      c.getContext('2d').drawImage(img, 0, 0, c.width, c.height);
+      const data = c.toDataURL('image/jpeg', .85).split(',')[1];
+      const r = await fetch('https://api.anthropic.com/v1/messages', {
+        method: 'POST',
+        headers: { 'content-type': 'application/json', 'x-api-key': dashKey(), 'anthropic-version': '2023-06-01', 'anthropic-dangerous-direct-browser-access': 'true' },
+        body: JSON.stringify({ model: 'claude-sonnet-5-5', max_tokens: 2500, messages: [{ role: 'user', content: [
+          { type: 'image', source: { type: 'base64', media_type: 'image/jpeg', data } }, { type: 'text', text: AI_PROMPT }] }] })
+      });
+      const j = await r.json();
+      if (!r.ok) throw new Error((j.error && j.error.message) || 'API error ' + r.status);
+      const t = j.content.map(b => b.text || '').join('');
+      return JSON.parse(t.slice(t.indexOf('{'), t.lastIndexOf('}') + 1));
+    }
+    const REPORT_FIELDS = [['pole_type','Pole type'],['pole_class','Pole class'],['pole_height','Pole height'],['conductors','Conductors'],['cross_arm','Cross arm'],
+      ['discs_count','Discs count'],['stay_wire','Stay wire'],['t_off','T/Off'],['foundation','Foundation'],['transformer','Transformer']];
+    function dashRenderReport(rep, defects) {
+      const esc = s => String(s).replace(/</g, '&lt;');
+      document.getElementById('dash-report').innerHTML = `<h3>Pole survey report <span>generated by AI from this photo</span></h3>
+        <div class="d-rgrid">` + REPORT_FIELDS.map(([k, l]) => { const f = rep[k] || {}; const nv = !f.value || f.basis === 'not_visible';
+          return `<div class="d-rtile${nv ? ' nv' : ''}"><small>${l}</small><b>${nv ? 'Not visible in photo' : esc(f.value)}</b>
+            <i class="${f.basis === 'estimated' ? 'est' : ''}">${nv ? 'Retake closer photo' : (f.basis === 'estimated' ? 'AI estimate ' : 'Seen ') + Math.round(f.conf || 0) + '%'}</i></div>`; }).join('') + `</div>` +
+        (defects.length ? `<div class="d-defects"><b>Defects found:</b>` + defects.map(d => `<span>${esc(d)}</span>`).join('') + `</div>` : `<div class="d-defects ok">No visible defects.</div>`);
+      document.getElementById('dash-report').classList.remove('hidden');
+    }
+
+    function dashRender() {
+      document.getElementById('dash-boxes').innerHTML = dashItems.map(i => { const T = DASH_TYPES[i.t]; return `
+        <div class="dash-box" id="dbox-${i.id}" onclick="dashSelect(${i.id})" style="left:${i.x}%;top:${i.y}%;width:${i.w}%;height:${i.h}%;border-color:${T.color};color:${T.color};background:${T.color}22">
+          <span class="dash-tag" style="background:${T.color};color:#10171D">${T.label} ${i.conf}%</span></div>`; }).join('');
+      document.getElementById('dash-scan').classList.add('hidden');
+      dashItems.forEach(i => i.thumb = dashCrop(i));
+      const cnt = t => dashItems.filter(i => i.t === t).length;
+      document.getElementById('dash-summary').innerHTML = [['Poles', cnt('pole'), '#FFB224'], ['Transformers', cnt('trf'), '#4CC9F0'], ['Other parts', dashItems.length - cnt('pole') - cnt('trf'), '#E8EFF3']]
+        .map(([l, n, c]) => `<div><b style="color:${c}">${n}</b><span>${l}</span></div>`).join('');
+      document.getElementById('dash-list').innerHTML = dashItems.map(i => { const T = DASH_TYPES[i.t]; return `
+        <div id="ditem-${i.id}" onclick="dashSelect(${i.id})" class="d-item" style="--c:${T.color}">
+          <img src="${i.thumb}" alt="${T.label}">
+          <div style="min-width:0"><h4>${T.label}<em>${i.conf}%</em></h4><p>${T.info}</p></div></div>`; }).join('');
+      const st = document.getElementById('dash-status');
+      st.textContent = `${dashItems.length} items found`; st.className = "d-pill ok";
+    }
+    function dashCrop(i) {
+      const img = document.getElementById('dash-img'), W = img.naturalWidth, H = img.naturalHeight;
+      if (!W) return '';
+      const sx = W * i.x / 100, sy = H * i.y / 100, sw = W * i.w / 100, sh = H * i.h / 100;
+      const c = document.createElement('canvas'), k = 160 / Math.max(sw, sh);
+      c.width = Math.max(1, sw * k); c.height = Math.max(1, sh * k);
+      try { c.getContext('2d').drawImage(img, sx, sy, sw, sh, 0, 0, c.width, c.height); return c.toDataURL('image/jpeg', .85); }
+      catch (e) { return img.src; }
+    }
+    function dashSelect(id) {
+      dashItems.forEach(i => {
+        document.getElementById('dbox-' + i.id).classList.toggle('sel', i.id === id);
+        document.getElementById('ditem-' + i.id).classList.toggle('on', i.id === id);
+      });
+      document.getElementById('ditem-' + id).scrollIntoView({ block: 'nearest', behavior: 'smooth' });
+    }
+
+    // App Initialization
+    window.onload = function() {
+      lucide.createIcons();
+      renderDashboardRecent();
+      renderHTPoleTable();
+      renderSurveyPhotosTable();
+      renderBoundingOverlay();
+      renderAIComponentsList();
+    };
+
+    // Submenu Toggle
+    function toggleSubmenu(id) {
+      const el = document.getElementById(id);
+      if (el) el.classList.toggle('hidden');
+    }
+
+    // Tab Switching Functionality
+    function switchTab(tabId) {
+      // Hide all tabs
+      const sections = document.querySelectorAll('main > div > section');
+      sections.forEach(sec => sec.classList.add('hidden'));
+
+      // Remove active sidebar highlight
+      const navButtons = document.querySelectorAll('aside nav button');
+      navButtons.forEach(btn => btn.classList.remove('sidebar-active'));
+
+      // Show selected tab
+      const targetSec = document.getElementById(`tab-${tabId}`);
+      if (targetSec) {
+        targetSec.classList.remove('hidden');
+      }
+
+      // Highlight active button
+      const activeNav = document.getElementById(`nav-${tabId}`);
+      if (activeNav) {
+        activeNav.classList.add('sidebar-active');
+      }
+
+      lucide.createIcons();
+    }
+
+    // Global Search Bar Handler
+    function handleGlobalSearch(event) {
+      if (event.key === 'Enter') {
+        const query = document.getElementById('top-search-input').value.toLowerCase().trim();
+        if (!query) return;
+
+        switchTab('ht-pole-data');
+        document.getElementById('filter-ht-pole-id').value = query;
+        filterHTTable();
+        showToast(`Filtered HT Poles by query: "${query}"`);
+      }
+    }
+
+    // Render Dashboard Recent Table
+    function renderDashboardRecent() {
+      document.getElementById('dashboard-recent-rows').innerHTML = htPoles.slice(0, 5).map(item => `
+        <tr><td style="color:var(--am);font-weight:600">HT</td><td style="font-weight:600">${item.poleNo}</td>
+        <td>${item.feeder}</td><td style="color:var(--mu)">${item.surveyor}</td><td style="color:var(--mu)">${item.date}</td>
+        <td><span class="d-tag">${item.status}</span></td>
+        <td style="text-align:right"><button onclick="switchTab('ht-pole-data')" class="d-open">Open</button></td></tr>`).join('');
+    }
+
+    // Render HT Pole Master Table
+    function renderHTPoleTable() {
+      const tbody = document.getElementById('ht-pole-table-body');
+      tbody.innerHTML = '';
+
+      htPoles.forEach(item => {
+        const tr = document.createElement('tr');
+        tr.className = "hover:bg-slate-50 transition";
+        tr.innerHTML = `
+          <td class="p-2.5 font-mono font-bold text-blue-600">${item.poleNo}</td>
+          <td class="p-2.5 text-slate-700 font-medium">${item.feeder}<br><span class="text-[10px] text-slate-400">${item.grid}</span></td>
+          <td class="p-2.5 text-slate-600">${item.classType}</td>
+          <td class="p-2.5 text-slate-600">${item.height}</td>
+          <td class="p-2.5">
+            <span class="px-2 py-0.5 rounded text-[10px] ${item.status === 'Submitted' ? 'bg-blue-50 text-blue-700 border-blue-200' : 'bg-slate-100 text-slate-600 border-slate-300'} font-semibold border">${item.status}</span>
+          </td>
+          <td class="p-2.5 text-slate-500">${item.date}<br><span class="text-[10px] text-slate-400">${item.surveyor}</span></td>
+          <td class="p-2.5 text-slate-600 font-mono">${item.stayDiscs}</td>
+          <td class="p-2.5 text-slate-500 font-mono">${item.x}</td>
+          <td class="p-2.5 text-slate-500 font-mono">${item.y}</td>
+          <td class="p-2.5 text-right space-x-1">
+            <button onclick="openPhotoAnalysisForPole('${item.poleNo}')" class="px-2 py-1 bg-blue-50 hover:bg-blue-100 text-blue-700 rounded text-[10px] font-semibold border border-blue-200">Details</button>
+          </td>
+        `;
+        tbody.appendChild(tr);
+      });
+
+      document.getElementById('stat-ht-poles').innerText = htPoles.length;
+    }
+
+    function filterHTTable() {
+      const poleQuery = document.getElementById('filter-ht-pole-id').value.toLowerCase();
+      const statusQuery = document.getElementById('filter-ht-status').value;
+
+      const rows = document.querySelectorAll('#ht-pole-table-body tr');
+      rows.forEach(tr => {
+        const text = tr.innerText.toLowerCase();
+        const matchesPole = text.includes(poleQuery);
+        const matchesStatus = statusQuery === 'all' || text.includes(statusQuery.toLowerCase());
+
+        if (matchesPole && matchesStatus) {
+          tr.style.display = '';
+        } else {
+          tr.style.display = 'none';
+        }
+      });
+    }
+
+    // Render Survey Photos List
+    function renderSurveyPhotosTable() {
+      const tbody = document.getElementById('survey-photos-table-body');
+      tbody.innerHTML = '';
+
+      surveyPhotos.forEach(item => {
+        const tr = document.createElement('tr');
+        tr.className = "hover:bg-slate-50 transition";
+        tr.innerHTML = `
+          <td class="p-2.5">
+            <img src="${item.image}" class="w-10 h-10 object-cover rounded border border-slate-300">
+          </td>
+          <td class="p-2.5 font-bold text-slate-700">${item.file}<br><span class="text-[10px] text-slate-400">${item.date}</span></td>
+          <td class="p-2.5 text-blue-600 font-mono font-bold">${item.pole}<br><span class="text-[10px] text-slate-500 font-normal">${item.feeder}</span></td>
+          <td class="p-2.5">
+            <span class="px-2 py-0.5 rounded text-[10px] bg-amber-50 text-amber-700 font-semibold border border-amber-200">${item.state}</span>
+          </td>
+          <td class="p-2.5 text-slate-600 font-mono">gemini-3.5-flash</td>
+          <td class="p-2.5 text-slate-600">
+            <strong class="text-slate-800">${item.detections}</strong><br>
+            <span class="text-[10px] text-slate-400">${item.confirmed} confirmed • ${item.rejected} rejected</span>
+          </td>
+          <td class="p-2.5 text-right space-x-1">
+            <button onclick="openPhotoAnalysisForPole('${item.pole}')" class="px-2.5 py-1 bg-blue-600 hover:bg-blue-700 text-white rounded text-[11px] font-semibold">Review</button>
+          </td>
+        `;
+        tbody.appendChild(tr);
+      });
+    }
+
+    // Render AI SVG Bounding Overlays
+    function renderBoundingOverlay() {
+      const svg = document.getElementById('inspector-svg-overlay');
+      const showBoxes = document.getElementById('toggle-show-boxes').checked;
+
+      svg.innerHTML = '';
+      if (!showBoxes) return;
+
+      currentDetections.forEach(item => {
+        if (item.state === 'Rejected') return;
+
+        const { x, y, w, h } = item.bbox;
+
+        // Bounding Rectangle
+        const rect = document.createElementNS("http://www.w3.org/2000/svg", "rect");
+        rect.setAttribute("x", `${x}%`);
+        rect.setAttribute("y", `${y}%`);
+        rect.setAttribute("width", `${w}%`);
+        rect.setAttribute("height", `${h}%`);
+        rect.setAttribute("fill", `${item.color}20`);
+        rect.setAttribute("stroke", item.color);
+        rect.setAttribute("stroke-width", "2");
+        rect.setAttribute("rx", "3");
+        svg.appendChild(rect);
+
+        // Label Badge
+        const text = document.createElementNS("http://www.w3.org/2000/svg", "text");
+        text.setAttribute("x", `${x + 1}%`);
+        text.setAttribute("y", `${Math.max(y - 1, 4)}%`);
+        text.setAttribute("fill", "#1e293b");
+        text.setAttribute("font-size", "10");
+        text.setAttribute("font-weight", "bold");
+        text.setAttribute("font-family", "Inter, sans-serif");
+
+        // Background label box
+        const textBg = document.createElementNS("http://www.w3.org/2000/svg", "rect");
+        textBg.setAttribute("x", `${x}%`);
+        textBg.setAttribute("y", `${Math.max(y - 5, 1)}%`);
+        textBg.setAttribute("width", `${item.name.length * 7 + 10}px`);
+        textBg.setAttribute("height", "14px");
+        textBg.setAttribute("fill", item.color);
+        textBg.setAttribute("rx", "2");
+
+        svg.appendChild(textBg);
+        text.textContent = item.name;
+        svg.appendChild(text);
+      });
+
+      document.getElementById('detection-total-count').innerText = currentDetections.filter(d => d.state !== 'Rejected').length;
+    }
+
+    // Render Right Panel Detection Components Cards
+    function renderAIComponentsList() {
+      const container = document.getElementById('ai-components-list');
+      container.innerHTML = '';
+
+      let confCount = 0, rejCount = 0, revCount = 0;
+
+      currentDetections.forEach(item => {
+        if (item.state === 'Confirmed') confCount++;
+        else if (item.state === 'Rejected') rejCount++;
+        else revCount++;
+
+        const card = document.createElement('div');
+        card.className = "bg-slate-50 p-3 rounded border border-slate-200 space-y-2";
+        card.innerHTML = `
+          <div class="flex items-center justify-between">
+            <span class="font-bold text-xs text-slate-800">${item.name}</span>
+            <div class="flex items-center space-x-1">
+              <span class="text-[10px] font-semibold text-emerald-700 bg-emerald-100 px-1.5 py-0.2 rounded">High ${item.conf}%</span>
+              <span class="text-[10px] font-semibold ${
+                item.state === 'Confirmed' ? 'bg-emerald-600 text-white' : item.state === 'Rejected' ? 'bg-rose-600 text-white' : 'bg-amber-100 text-amber-800'
+              } px-1.5 py-0.2 rounded">${item.state}</span>
+            </div>
+          </div>
+          <div class="text-[10px] text-slate-400">AI detected component</div>
+
+          <div class="flex items-center space-x-2 pt-1 border-t border-slate-200">
+            <button onclick="setComponentState(${item.id}, 'Confirmed')" class="flex-1 py-1 bg-emerald-600 hover:bg-emerald-700 text-white text-[10px] font-bold rounded shadow-sm">
+              ✓ Confirm
+            </button>
+            <button onclick="setComponentState(${item.id}, 'Rejected')" class="flex-1 py-1 bg-white hover:bg-rose-50 text-rose-600 text-[10px] font-bold rounded border border-rose-300">
+              ✕ Reject
+            </button>
+          </div>
+        `;
+        container.appendChild(card);
+      });
+
+      document.getElementById('count-confirmed-tag').innerText = `${confCount} confirmed`;
+      document.getElementById('count-rejected-tag').innerText = `${rejCount} rejected`;
+      document.getElementById('count-review-tag').innerText = `${revCount} to review`;
+    }
+
+    function setComponentState(id, newState) {
+      const found = currentDetections.find(d => d.id === id);
+      if (found) {
+        found.state = newState;
+        found.color = newState === 'Confirmed' ? '#10b981' : newState === 'Rejected' ? '#f43f5e' : '#eab308';
+        renderBoundingOverlay();
+        renderAIComponentsList();
+        showToast(`Component marked as ${newState}`);
+      }
+    }
+
+    function confirmAllHighConfidence() {
+      currentDetections.forEach(item => {
+        if (item.conf >= 80) {
+          item.state = 'Confirmed';
+          item.color = '#10b981';
+        }
+      });
+      renderBoundingOverlay();
+      renderAIComponentsList();
+      showToast("All high confidence components confirmed!");
+    }
+
+    function openPhotoAnalysisForPole(poleNo) {
+      document.getElementById('photo-title-header').innerText = `Photo Pole_${poleNo}.JPG`;
+      switchTab('ai-inspector');
+    }
+
+    function handlePhotoUpload(event) {
+      const file = event.target.files[0];
+      if (file) {
+        const reader = new FileReader();
+        reader.onload = function(e) {
+          document.getElementById('inspector-image').src = e.target.result;
+          
+          // Generate new detections for custom image
+          currentDetections = [
+            { id: 1, name: "Pole Shaft", conf: 96, state: "Needs review", bbox: { x: 40, y: 10, w: 18, h: 82 }, color: "#eab308" },
+            { id: 2, name: "Cross Arm", conf: 92, state: "Needs review", bbox: { x: 22, y: 22, w: 54, h: 12 }, color: "#eab308" },
+            { id: 3, name: "Insulator Assembly", conf: 89, state: "Needs review", bbox: { x: 20, y: 16, w: 58, h: 8 }, color: "#eab308" },
+            { id: 4, name: "Transformer", conf: 84, state: "Needs review", bbox: { x: 32, y: 36, w: 34, h: 30 }, color: "#eab308" }
+          ];
+
+          renderBoundingOverlay();
+          renderAIComponentsList();
+          showToast("Uploaded photo scanned successfully!");
+        };
+        reader.readAsDataURL(file);
+      }
+    }
+
+    function reAnalyzeCurrentPhoto() {
+      showToast("Re-analyzing image with gemini-3.5-flash...");
+      setTimeout(() => {
+        confirmAllHighConfidence();
+      }, 600);
+    }
+
+    // GPS Simulation for Mobile Survey Form
+    function simulateGPSCapture() {
+      document.getElementById('survey-input-lat').value = "31.418012";
+      document.getElementById('survey-input-lng').value = "73.079025";
+      showToast("GPS location captured: (31.4180, 73.0790)");
+    }
+
+    function handleSurveyFormSubmit(event) {
+      event.preventDefault();
+      const pole = document.getElementById('survey-input-pole').value;
+      const classType = document.getElementById('survey-input-class').value;
+      const height = document.getElementById('survey-input-height').value;
+      const lat = document.getElementById('survey-input-lat').value || "31.4180";
+      const lng = document.getElementById('survey-input-lng').value || "73.0790";
+
+      htPoles.unshift({
+        poleNo: pole,
+        feeder: "Thokar Niaz Baig",
+        grid: "Madina Town Grid Station",
+        classType: classType,
+        height: height,
+        status: "Submitted",
+        date: "30 Sep 2026",
+        surveyor: "Field Surveyor",
+        stayDiscs: "1 / 0",
+        x: lng,
+        y: lat
+      });
+
+      renderHTPoleTable();
+      renderDashboardRecent();
+      showToast(`HT Survey for Pole #${pole} recorded successfully!`);
+      switchTab('ht-pole-data');
+    }
+
+    // Toast Message System
+    function showToast(msg) {
+      const box = document.getElementById('toast-box');
+      document.getElementById('toast-text').innerText = msg;
+
+      box.classList.remove('translate-y-20', 'opacity-0');
+      box.classList.add('translate-y-0', 'opacity-100');
+
+      setTimeout(() => {
+        box.classList.remove('translate-y-0', 'opacity-100');
+        box.classList.add('translate-y-20', 'opacity-0');
+      }, 3000);
+    }
+  </script>
+</body>
+</html>
